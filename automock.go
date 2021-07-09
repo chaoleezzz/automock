@@ -1,4 +1,4 @@
-package automock
+package main
 
 import (
 	"github.com/atotto/clipboard"
