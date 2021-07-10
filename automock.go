@@ -10,7 +10,7 @@ func main() {
 	text1 := ""
 	text2 := ""
 	for {
-		time.Sleep(1000000000 )//剪切板触发为300ms一次，节约cpu资源
+		time.Sleep(500000000)//剪切板触发为0.5s一次，节约cpu资源
 		text1, _ = clipboard.ReadAll()
 		if text1 == text2 {
 			fmt.Println("剪切板未更新" + text1)
