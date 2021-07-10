@@ -1,0 +1,7 @@
+output
+go.sum
+*.out
+.idea
+coverage.*
+log
+.DS_Store
