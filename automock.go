@@ -17,25 +17,25 @@ func main() {
 		time.Sleep(500000000)//剪切板触发为0.5s一次，节约cpu资源
 		text1, _ = clipboard.ReadAll()
 		if text1 == text2 {
-			fmt.Println("剪切板未更新" + text1)
+			//fmt.Println("剪切板未更新" + text1)
 			continue
 		}
 		//过滤规则1
 		if len(text1) <= 5 {
 			text2 = text1
-			fmt.Println("过滤规则1过滤")
+			//fmt.Println("过滤规则1过滤")
 			continue
 		}
 		//过滤规则2
 		if text1[0:4] != "func" || text1[len(text1)-1] != '{'{
 			text2 = text1
-			fmt.Println("过滤规则2过滤")
+			//fmt.Println("过滤规则2过滤")
 			continue
 		}
 		//过滤规则3
 		if !filter3(text1) {
 			text2 = text1
-			fmt.Println("过滤规则3过滤")
+			//fmt.Println("过滤规则3过滤")
 			continue
 		}
 		////过滤规则4
