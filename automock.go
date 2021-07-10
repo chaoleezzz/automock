@@ -3,12 +3,16 @@ package main
 import (
 	"fmt"
 	"github.com/atotto/clipboard"
+	"log"
+	"os"
 	"time"
 )
 
 func main() {
 	text1 := ""
 	text2 := ""
+	Info := log.New(os.Stdout, "[INFO] ", log.Ldate|log.Ltime|log.Lshortfile)
+	Info.Println("\nautomock监听剪切板中…………\n如果偶遇程序崩溃请重新启动程序,Thx ^.^")
 	for {
 		time.Sleep(500000000)//剪切板触发为0.5s一次，节约cpu资源
 		text1, _ = clipboard.ReadAll()
