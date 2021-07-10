@@ -127,7 +127,7 @@ func format (before string) (after string) {
 			continue
 		}
 		case "string": {
-			mockReturn = append(mockReturn, "thisIsString")
+			mockReturn = append(mockReturn, "\"thisIsString\"")
 			continue
 		}
 		case "uintptr": {
@@ -166,6 +166,7 @@ func format (before string) (after string) {
 
 //前置处理：去除所选字符串的所有回车、tab、以及回车前的"，"
 func removeBackAndComma (in string) (out string) {
+
 	for i := 0; i < len(in); i++ {
 		if in[i] == '\n' || in[i] == '\t' {
 			in = in[:i] + in[i+1:]
