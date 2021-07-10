@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/atotto/clipboard"
 	"log"
 	"os"
@@ -52,7 +51,7 @@ func main() {
 				return
 			}
 			text2 = text1
-			fmt.Println(text2)
+			//fmt.Println(text2)
 		}
 	}
 }
