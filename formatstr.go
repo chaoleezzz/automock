@@ -1,10 +1,19 @@
 package main
 
+import (
+	"strings"
+)
+
 func format (before string) (after string) {
 	before = removeBackAndComma(before)
 	bracket := true //返回参数是否有括号包围的标识符
 	caller := ""
-	outputs := make([]string, 0)
+	baseType  := []string{
+		"int8", "int16", "int32", "int64", "byte", "rune",
+		"int", "uint8", "uint16", "uint32", "uint64", "uint",
+		"float32", "float64", "complex64", "complex128", "bool", "string", "uintptr"}
+	outputsName := make([]string, 0)
+	outputsType := make([]string, 0)
 	mockReturn := make([]string, 0)
 	funcName := ""
 	i := 5 //过滤func
@@ -79,36 +88,83 @@ func format (before string) (after string) {
 			}
 			j--
 		} //此时j到达唯一的变量结尾
-
 		//防止传入没有返回参数的函数，返回传入的字符串
 		if i >= j+1 {
 			return before
 		}
-		outputs = append(outputs, before[i:j+1])
+		outputsType = append(outputsType, before[i:j+1])
 	} else { //返回值用括号包起来的情况
 		j++
-		i = j //ij到达返回类型的位置
+		i = j //ij到达返回最开头的位置
 		for {
 			j++
-			if before[j] == ' ' {
-				i = j + 1 //有返回变量名的情况
+			if before[j] == ')' {
+				break
 			}
-			if before[j] == ',' || before[j] == ')' {
-				outputs = append(outputs, before[i:j])
-				if before[j] == ')'{
-					break
+		}
+		//此时ij包括返回值
+		outputs := make([]string, 0)
+		outputs = strings.Split(before[i:j], ",")
+		StringIsType2 := false
+		for index, eachStr := range outputs {
+			if eachStr[0] == ' ' {
+				eachStr = eachStr[1:]
+				outputs[index] = eachStr
+			}
+			if eachStr[len(eachStr)-1] == ' ' {
+				eachStr = eachStr[:len(eachStr)]
+				outputs[index] = eachStr
+			}
+			if strings.Contains(eachStr, " ") {
+				StringIsType2 = true //主要有一个有空格，那此时不是全为类型名的情况，存在批量声明
+				break
+			}
+		}
+
+		//不是全为类型名的情况，存在批量声明：  startTime time.Time, endTime, performanceMonth time.Time,
+		if StringIsType2 {
+			for index, eachStr := range outputs {
+				if eachStr[0] == ' ' {
+					eachStr = eachStr[1:]
+					outputs[index] = eachStr
 				}
-				i = j + 1 //已经获取到一个返回值output类型
-				if before[i] == ' '{
-					i++
-					j++
+				if eachStr[len(eachStr)-1] == ' ' {
+					eachStr = eachStr[:len(eachStr)]
+					outputs[index] = eachStr
+				}
+				if strings.Contains(eachStr, " ") {
+					withSpace := strings.Split(eachStr, " ")
+					outputsName = append(outputsName, withSpace[0])
+					outputsType = append(outputsType, withSpace[1])
+				} else { //没有空格，就只有变量名，需要调用后面的批量
+					outputsName = append(outputsName, eachStr)
+					outputsType = append(outputsType,"")
+				}
+			}
+		} else { //全为类型名的情况不用处理，直接去输出 StringIsType2 为false时
+			outputsType = outputs
+		}
+	}
+	//处理类似于func GetAccessibleDataRange(timeRange *ContentMmpPerformance.TimeRange, currentTime time.Time) (
+	//	startTime, endTime , performanceMonth time.Time,
+	//) { 这种批量声明类型的方式，返回值，
+	// 一个返回只有类型应该是全部都只有类型，所以只要有一个既有名字又有类型就可以断定为第二种，第二种这种情况只出现一个的话那就是名字不是类型了
+	// startTime time.Time, endTime, performanceMonth time.Time,
+	for index, outputType := range outputsType {
+		if outputType == "" {
+			for _, afterOutput := range outputsType[index+1:] {
+				if afterOutput == "" {
+					continue
+				} else {
+					outputsType[index] = afterOutput
+					break
 				}
 			}
 		}
 	}
 
 	//此时获取到所有的返回类型，后面是字符串拼接的过程
-	for _, output := range outputs {
+	for _, output := range outputsType {
 		switch output {
 		case "int8", "int16", "int32", "int64", "byte", "rune", "int": {
 			mockReturn = append(mockReturn, "0")
@@ -141,9 +197,17 @@ func format (before string) (after string) {
 			//mockReturn = append(mockReturn, "errors.New(\"mock err\")")
 			mockReturn = append(mockReturn, "nil")
 		} else if output[0:2] == "[]" {
-			mockReturn = append(mockReturn, output + "{{}}")
-		} else {
-			mockReturn = append(mockReturn, output +"{}")
+			isBaseType := false
+			for _, each := range baseType {
+				if output[2:] == each {
+					mockReturn = append(mockReturn, output +"{}")
+					isBaseType = true
+					break
+				}
+			}
+			if !isBaseType {
+			mockReturn = append(mockReturn, output +"{{}}")
+			}
 		}
 	}
 	//有无调用者（是否为方法函数）的拼接方式
