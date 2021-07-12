@@ -10,7 +10,7 @@
 
 
 ## 获取方法
-go get github.com/chaoleezzz/automock@lastest
+go get github.com/chaoleezzz/automock@latest
 运行命令为 automock，运行中程序会监听剪切板，功能生效
 
 
