@@ -208,6 +208,8 @@ func format (before string) (after string) {
 			if !isBaseType {
 			mockReturn = append(mockReturn, output +"{{}}")
 			}
+		} else { //就是普通类型，前面什么都没有
+			mockReturn = append(mockReturn, output +"{}")
 		}
 	}
 	//有无调用者（是否为方法函数）的拼接方式
