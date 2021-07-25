@@ -1,10 +1,12 @@
 package main
 
 import (
-	"github.com/atotto/clipboard"
 	"log"
 	"os"
+	"strings"
 	"time"
+
+	"github.com/atotto/clipboard"
 )
 
 func main() {
@@ -13,8 +15,9 @@ func main() {
 	Info := log.New(os.Stdout, "[INFO] ", log.Ldate|log.Ltime|log.Lshortfile)
 	Info.Println("\nautomock监听剪切板中…………\n如果偶遇程序崩溃请重新启动程序,Thx ^.^")
 	for {
-		time.Sleep(500000000)//剪切板触发为0.5s一次，节约cpu资源
+		time.Sleep(500000000) //剪切板触发为0.5s一次，节约cpu资源
 		text1, _ = clipboard.ReadAll()
+		text1 = preTreat(text1)
 		if text1 == text2 {
 			//fmt.Println("剪切板未更新" + text1)
 			continue
@@ -26,7 +29,7 @@ func main() {
 			continue
 		}
 		//过滤规则2
-		if text1[0:4] != "func" || text1[len(text1)-1] != '{'{
+		if text1[0:4] != "func" || text1[len(text1)-1] != '{' {
 			text2 = text1
 			//fmt.Println("过滤规则2过滤")
 			continue
@@ -57,15 +60,15 @@ func main() {
 }
 
 //过滤规则3
-func filter3 (in string) (out bool) {
+func filter3(in string) (out bool) {
 	leftB := 0
 	diffB := 0
-	for _, ch :=range in{
-		if ch =='(' {
+	for _, ch := range in {
+		if ch == '(' {
 			leftB++
 			diffB++
 		}
-		if ch ==')' {
+		if ch == ')' {
 			diffB--
 		}
 		if diffB != 0 && diffB != 1 {
@@ -90,3 +93,8 @@ func filter3 (in string) (out bool) {
 //	}
 //}
 
+// 预处理输入字符串
+func preTreat(text string) string {
+	// 忽略首尾空白符
+	return strings.TrimSpace(text)
+}
